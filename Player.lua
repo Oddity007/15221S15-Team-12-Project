@@ -3,18 +3,23 @@ local Player = Class()
 
 function Player:__init__(game)
 	self.game = game
-	self.radius = 50
+	self.radius = 10
 	local startX, startY = 0, 0
 	local mass = 1
 	self.shape = love.physics.newCircleShape(self.radius)
 	self.body = love.physics.newBody(game.world, startX, startY, "dynamic")
 	self.fixture = love.physics.newFixture(self.body, self.shape, mass)
 	self.fixture:setUserData(self)
+	self.fixture:setRestitution(0.9)
 end
 
 function Player:getPosition()
 	local x, y = self.body:getPosition()
 	return x, y
+end
+
+function Player:setPosition(x, y)
+	self.body:setPosition(x, y)
 end
 
 function Player:onRender()

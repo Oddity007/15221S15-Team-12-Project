@@ -3,6 +3,8 @@ local Game = Class()
 local SceneManager = require "SceneManager"
 local Player = require "Player"
 local Cannon = require "Cannon"
+local Map = require "Map"
+local Tunnel = require "Tunnel"
 
 function Game:__init__()
 	self.sceneManager = SceneManager()
@@ -18,11 +20,71 @@ function Game:__init__()
 	end
 	self.world:setCallbacks(nil, nil, nil, postSolveCallback)
 
+	self.unpairedTunnelIDs = {}
+	self.tunnelIDs = {}
+	self.tunnelTransitions = {}
+	self.startingTunnelID = self:generateNewTunnelID(false)
+
 	self.entities = {}
 	self.entities.player = Player(self)
-	self.entities[#self.entities + 1] = Cannon(self, 400, 250, 1000, 1000)
+	self.entities.map = Map(self, self.startingTunnelID)
 
 	love.graphics.setBackgroundColor(255, 255, 255)
+end
+
+function Game:enterTunnel(id)
+	local exitTunnelID = self.tunnelIDs[id]
+	local nextMap = nil
+	if exitTunnelID then
+		nextMap = self.tunnelTransitions[exitTunnelID]
+	end
+	
+	self.entities.map:sleep()
+	
+	local player = self.entities.player
+	
+	self.entities = {}
+	self.entities.player = player
+	if nextMap then
+		self.entities.map = nextMap
+		self.entities.map:awaken()
+	else
+		nextMap = Map(self, exitTunnelID)
+		self.entities.map = nextMap
+	end
+	print(id)
+	print(nextMap)
+end
+
+function Game:registerMapTunnelIDs(map, tunnelIDs)
+	for _, id in ipairs(tunnelIDs) do
+		self.tunnelTransitions[id] = map
+	end
+end
+
+function Game:generateNewTunnelID(shouldPairWithPreviousTunnel, pairingTunnelID)
+	if shouldPairWithPreviousTunnel and #self.unpairedTunnelIDs > 0 then
+		local id = pairingTunnelID
+		if id then
+			for i, v in pairs(self.unpairedTunnelIDs) do
+				if v == id then
+					self.unpairedTunnelIDs[i] = nil
+				end
+			end
+		else
+			id = self.unpairedTunnelIDs[#self.unpairedTunnelIDs]
+			self.unpairedTunnelIDs[#self.unpairedTunnelIDs] = nil
+		end
+		local newID =  #self.tunnelIDs + 1
+		self.tunnelIDs[id] = newID
+		self.tunnelIDs[newID] = id
+		return id
+	else
+		local id =  #self.tunnelIDs + 1
+		self.unpairedTunnelIDs[#self.unpairedTunnelIDs + 1] = id
+		self.tunnelIDs[id] = false
+		return id
+	end
 end
 
 function Game:onRender()
