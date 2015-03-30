@@ -1,6 +1,10 @@
 local Class = require "Class"
 local Rectangle = Class()
 
+--[[The Rectangle class is used when we need to test if a point is within
+	a particular rectangular region (typically for collision detection).
+--]]
+
 function Rectangle:__init__(x, y, w, h)
 	self.x = x
 	self.y = y

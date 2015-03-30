@@ -1,6 +1,11 @@
 local Class = require "Class"
 local Player = Class()
 
+--[[The Player class represents the player character in the game. It
+	includes methods to move and display the character.
+--]]
+
+-- initialize Player object
 function Player:__init__(game)
 	self.game = game
 	self.radius = 10
@@ -13,53 +18,64 @@ function Player:__init__(game)
 	self.fixture:setRestitution(0.9)
 end
 
+-- get the Player's position as (x,y) coordinates
 function Player:getPosition()
 	local x, y = self.body:getPosition()
 	return x, y
 end
 
+-- set the Player's position with (x,y) coordinates
 function Player:setPosition(x, y)
 	self.body:setPosition(x, y)
 end
 
+-- draw Player
 function Player:onRender()
 	love.graphics.setColor(0, 0, 0, 255)
 	local x, y = self:getPosition()
+	--more segments makes for a smoother circle but takes more resources
 	local numberOfSegments = 50
 	love.graphics.circle("fill", x, y, self.radius, numberOfSegments)
 end
 
+-- update forces on Player depending on player input
 function Player:beforePhysicsUpdate(seconds)
 	local force = 1000
 
+	--up
 	if love.keyboard.isDown("w") then
 		self.body:applyForce(0, -force)
 	end
 	
+	--down
 	if love.keyboard.isDown("s") then
 		self.body:applyForce(0, force)
 	end
 
+	--left
 	if love.keyboard.isDown("a") then
 		self.body:applyForce(-force, 0)
 	end
 
+	--right
 	if love.keyboard.isDown("d") then
 		self.body:applyForce(force, 0)
 	end
 end
 
+-- implements the damping portion of a spring-damper system
 function Player:afterPhysicsUpdate(seconds)
-	--Implements the damping portion of a spring-damper system
 	local velocityX, velocityY = self.body:getLinearVelocity()
 	local dampingFactor = -10
 	self.body:applyForce(dampingFactor * velocityX, dampingFactor * velocityY)
 end
 
+-- NYI
 function Player:onCollision(contact, otherEntity)
 	
 end
 
+-- NYI
 function Player:onMousePress(x, y, button)
 	if button == "r" then
 		
@@ -68,6 +84,7 @@ function Player:onMousePress(x, y, button)
 	end
 end
 
+-- NYI
 function Player:onKeyPress(key, unicode)
 	
 end

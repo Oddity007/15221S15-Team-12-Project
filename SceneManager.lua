@@ -1,6 +1,8 @@
 local Class = require "Class"
-
 local SceneManager = Class()
+
+--[[Describe the SceneManager class:
+--]]
 
 function SceneManager:__init__()
 	self.acquiredObjects = setmetatable({}, {__mode = "v"})

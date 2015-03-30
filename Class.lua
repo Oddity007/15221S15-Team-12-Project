@@ -1,5 +1,9 @@
 --Based on http://www.rtsoft.com/forums/showthread.php?1466-A-cleaner-easier-class-idiom-in-Lua
 
+--[[Lua is not inherently object-oriented, but we implement classes ourselves here.
+	Example: Player = Class() in the "Player.lua" file creates a Player class.
+--]]
+
 return function(superclass)
 	local class = superclass and superclass() or {}
 	rawset(class, "__instanceMetatable__", {__index = class})

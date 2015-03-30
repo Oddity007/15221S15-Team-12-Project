@@ -1,6 +1,11 @@
 local Class = require "Class"
 local Tunnel = Class()
 
+--[[The Tunnel class represents the portals between areas in the game. When
+	the player enters one, he or she warps to a new level/area.
+--]]
+
+-- initialize Tunnel object
 function Tunnel:__init__(game, x, y, id)
 	self.game = game
 	self.radius = 10
@@ -9,11 +14,13 @@ function Tunnel:__init__(game, x, y, id)
 	self.id = id
 end
 
+-- get the Tunnel's position as (x,y) coordinates
 function Tunnel:getPosition()
 	--local x, y = self.body:getPosition()
 	return self.x, self.y
 end
 
+-- draw Tunnel
 function Tunnel:onRender()
 	love.graphics.setColor(0, 0, 0, 255)
 	local x, y = self:getPosition()
@@ -23,6 +30,7 @@ function Tunnel:onRender()
 	love.graphics.setColor(0, 0, 0)
 end
 
+-- check if Player has entered Tunnel
 function Tunnel:beforePhysicsUpdate(seconds)
 	local player = self.game.entities.player
 	local px, py = self:getPosition()
