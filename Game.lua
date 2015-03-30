@@ -6,12 +6,18 @@ local Cannon = require "Cannon"
 local Map = require "Map"
 local Tunnel = require "Tunnel"
 
+--[[The Game class controls everything that happens in the game at a high
+	level.
+--]]
+
+-- initialize the Game
 function Game:__init__()
 	self.sceneManager = SceneManager()
 	self.world = love.physics.newWorld(0, 0, 0)
 
 	self.camera = {position = {x = 0, y = 0}, scale = 1}
 
+	--detect collisions
 	local function postSolveCallback(fixture1, fixture2, contact)
 		local entity1 = fixture1:getUserData()
 		local entity2 = fixture2:getUserData()
@@ -20,11 +26,13 @@ function Game:__init__()
 	end
 	self.world:setCallbacks(nil, nil, nil, postSolveCallback)
 
+	--prepare tunnels
 	self.unpairedTunnelIDs = {}
 	self.tunnelIDs = {}
 	self.tunnelTransitions = {}
 	self.startingTunnelID = self:generateNewTunnelID(false)
 
+	--prepare (collidable) entities
 	self.entities = {}
 	self.entities.player = Player(self)
 	self.entities.map = Map(self, self.startingTunnelID)
@@ -32,6 +40,7 @@ function Game:__init__()
 	love.graphics.setBackgroundColor(255, 255, 255)
 end
 
+-- process what happens when player enters a tunnel
 function Game:enterTunnel(id)
 	local exitTunnelID = self.tunnelIDs[id]
 	local nextMap = nil
@@ -56,12 +65,14 @@ function Game:enterTunnel(id)
 	print(nextMap)
 end
 
+-- connect tunnel IDs to their transitions (?)
 function Game:registerMapTunnelIDs(map, tunnelIDs)
 	for _, id in ipairs(tunnelIDs) do
 		self.tunnelTransitions[id] = map
 	end
 end
 
+-- 
 function Game:generateNewTunnelID(shouldPairWithPreviousTunnel, pairingTunnelID)
 	if shouldPairWithPreviousTunnel and #self.unpairedTunnelIDs > 0 then
 		local id = pairingTunnelID
@@ -87,6 +98,7 @@ function Game:generateNewTunnelID(shouldPairWithPreviousTunnel, pairingTunnelID)
 	end
 end
 
+-- draw everything in the game (called each draw loop)
 function Game:onRender()
 	love.graphics.push()
 	love.graphics.scale(self.camera.scale)
@@ -98,6 +110,7 @@ function Game:onRender()
 	love.graphics.pop()
 end
 
+-- update everything in the game (called each update loop)
 function Game:onUpdate(seconds)
 	for _, entity in pairs(self.entities) do
 		local f = entity.beforePhysicsUpdate
@@ -112,6 +125,7 @@ function Game:onUpdate(seconds)
 	end
 end
 
+-- process mouse clicks
 function Game:onMousePress(mouseX, mouseY, button)
 	for _, entity in pairs(self.entities) do
 		local f = entity.onMousePress
@@ -119,6 +133,7 @@ function Game:onMousePress(mouseX, mouseY, button)
 	end
 end
 
+-- process key presses
 function Game:onKeyPress(key, unicode)
 	for _, entity in pairs(self.entities) do
 		local f = entity.onKeyPress
