@@ -3,6 +3,7 @@ local Map = Class()
 
 local Cannon = require "Cannon"
 local SceneryEntity = require "SceneryEntity"
+local Collectable = require "Collectable"
 local Tunnel = require "Tunnel"
 
 function Map:__init__(game, entraceTunnelID)
@@ -20,6 +21,16 @@ function Map:__init__(game, entraceTunnelID)
 		self.game.entities[#self.game.entities + 1] = entity
 		self.entities[#self.entities + 1] = entity
 	end	
+
+---[[
+	for i=1,math.random(1, 20) do
+		local x = width * math.random()
+		local y = height * math.random()
+		local collect = Collectable(self.game, x, y)
+		self.game.entities[#self.game.entities + 1] = collect
+		self.entities[#self.entities + 1] = collect
+	end	
+--]]
 
 	local tunnels = {}
 	local tunnelIDs = {}
