@@ -14,7 +14,11 @@ function SceneryEntity:__init__(game, x, y)
 	self.body = love.physics.newBody(game.world, x, y, "static")
 	self.fixture = love.physics.newFixture(self.body, self.shape, mass)
 	self.fixture:setUserData(self)
-	self.fixture:setRestitution(0.9)
+	self.fixture:setRestitution(1)
+end
+
+function SceneryEntity:setRestitution(to)
+	self.fixture:setRestitution(to)
 end
 
 -- get the SceneryEntity's position as (x,y) coordinates

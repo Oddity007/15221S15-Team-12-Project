@@ -21,16 +21,17 @@ function Cannon:getPosition()
 end
 
 function Cannon:onRender()
-	love.graphics.setColor(0, 0, 0, 255)
+	love.graphics.setColor(255, 0, 0, 255)
 	local x, y = self:getPosition()
 	local numberOfSegments = 50
 	love.graphics.circle("fill", x, y, self.radius, numberOfSegments)
+	love.graphics.line(x, y, x + self.launchImpulseX, y + self.launchImpulseY)
 end
 
 function Cannon:beforePhysicsUpdate(seconds)
 	local player = self.game.entities.player
 	local px, py = player:getPosition()
-	local cx, cy = player:getPosition()
+	local cx, cy = self:getPosition()
 	local dx, dy = (px - cx), (py - cy)
 	if dx * dx + dy * dy < self.radius * self.radius then
 		player.body:applyLinearImpulse(self.launchImpulseX, self.launchImpulseY)

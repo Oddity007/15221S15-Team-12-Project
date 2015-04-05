@@ -38,6 +38,13 @@ function Game:__init__()
 	self.entities.map = Map(self, self.startingTunnelID)
 
 	love.graphics.setBackgroundColor(255, 255, 255)
+
+	self.timeDilation = 1
+end
+
+--Control Time Dilation (Game time relative to player time)
+function Game:setTimeDilation(to)
+	self.timeDilation = to
 end
 
 -- process what happens when player enters a tunnel
@@ -80,8 +87,10 @@ function Game:generateNewTunnelID(shouldPairWithPreviousTunnel, pairingTunnelID)
 			for i, v in pairs(self.unpairedTunnelIDs) do
 				if v == id then
 					self.unpairedTunnelIDs[i] = nil
+					break
 				end
 			end
+			
 		else
 			id = self.unpairedTunnelIDs[#self.unpairedTunnelIDs]
 			self.unpairedTunnelIDs[#self.unpairedTunnelIDs] = nil
@@ -112,6 +121,8 @@ end
 
 -- update everything in the game (called each update loop)
 function Game:onUpdate(seconds)
+	seconds = seconds * self.timeDilation
+
 	for _, entity in pairs(self.entities) do
 		local f = entity.beforePhysicsUpdate
 		if f then f(entity, seconds) end

@@ -40,7 +40,7 @@ end
 
 -- update forces on Player depending on player input
 function Player:beforePhysicsUpdate(seconds)
-	local force = 1000
+	local force = 100
 
 	--up
 	if love.keyboard.isDown("w") then
@@ -61,12 +61,19 @@ function Player:beforePhysicsUpdate(seconds)
 	if love.keyboard.isDown("d") then
 		self.body:applyForce(force, 0)
 	end
+
+	--slow time
+	if love.keyboard.isDown("lshift") then
+		self.game:setTimeDilation(1/8)
+	else
+		self.game:setTimeDilation(1)
+	end
 end
 
 -- implements the damping portion of a spring-damper system
 function Player:afterPhysicsUpdate(seconds)
 	local velocityX, velocityY = self.body:getLinearVelocity()
-	local dampingFactor = -10
+	local dampingFactor = -1
 	self.body:applyForce(dampingFactor * velocityX, dampingFactor * velocityY)
 end
 
