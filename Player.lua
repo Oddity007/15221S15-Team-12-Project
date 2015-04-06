@@ -16,6 +16,8 @@ function Player:__init__(game)
 	self.fixture = love.physics.newFixture(self.body, self.shape, mass)
 	self.fixture:setUserData(self)
 	self.fixture:setRestitution(0.9)
+
+	self.cloudImage = self.game.assetManager:acquire("Assets/ExampleImage.lua")
 end
 
 -- get the Player's position as (x,y) coordinates
@@ -31,11 +33,16 @@ end
 
 -- draw Player
 function Player:onRender()
-	love.graphics.setColor(0, 0, 0, 255)
+	love.graphics.setColor(0, 255, 0, 255)
 	local x, y = self:getPosition()
 	--more segments makes for a smoother circle but takes more resources
 	local numberOfSegments = 50
 	love.graphics.circle("fill", x, y, self.radius, numberOfSegments)
+
+	love.graphics.setColor(255, 255, 255, 255)
+	love.graphics.draw(self.cloudImage, x, y, 0, 0.1, 0.1, 0, 0)
+
+	love.graphics.setColor(0, 0, 0, 255)
 end
 
 -- update forces on Player depending on player input

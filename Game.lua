@@ -1,6 +1,6 @@
 local Class = require "Class"
 local Game = Class()
-local SceneManager = require "SceneManager"
+local AssetManager = require "AssetManager"
 local Player = require "Player"
 local Cannon = require "Cannon"
 local Map = require "Map"
@@ -8,16 +8,20 @@ local Tunnel = require "Tunnel"
 
 --[[The Game class controls everything that happens in the game at a high
 	level.
+
+	--Forwards and generates events for all objects registered in self.entities
+	--Manages the connections between maps
+	--Updates physics
 --]]
 
 -- initialize the Game
 function Game:__init__()
-	self.sceneManager = SceneManager()
+	self.assetManager = AssetManager()
 	self.world = love.physics.newWorld(0, 0, 0)
 
 	self.camera = {position = {x = 0, y = 0}, scale = 1}
 
-	--detect collisions
+	--Forwards a collision message to colliding entities
 	local function postSolveCallback(fixture1, fixture2, contact)
 		local entity1 = fixture1:getUserData()
 		local entity2 = fixture2:getUserData()
@@ -30,6 +34,7 @@ function Game:__init__()
 	self.unpairedTunnelIDs = {}
 	self.tunnelIDs = {}
 	self.tunnelTransitions = {}
+	--Start off with a single tunnel exit that player starts out of
 	self.startingTunnelID = self:generateNewTunnelID(false)
 
 	--prepare (collidable) entities
@@ -42,6 +47,25 @@ function Game:__init__()
 	self.timeDilation = 1
 end
 
+--Register an entity for events
+function Game:addEntity(entity)
+	local entities = self.entities
+	entities[#entities + 1] = entity
+end
+
+--Unregister an entity for events
+function Game:removeEntity(entity)
+	local entities = self.entities
+	local lastEntity = entities[#entities]
+	for i, v in ipairs(entities) do
+		if v == entity then
+			entities[i] = lastEntity
+			entities[#entities] = nil
+			return
+		end
+	end
+end
+
 --Control Time Dilation (Game time relative to player time)
 function Game:setTimeDilation(to)
 	self.timeDilation = to
@@ -51,35 +75,39 @@ end
 function Game:enterTunnel(id)
 	local exitTunnelID = self.tunnelIDs[id]
 	local nextMap = nil
+
+	--If the tunnel entrance has an existing exit, then find the map that's it leads to
 	if exitTunnelID then
 		nextMap = self.tunnelTransitions[exitTunnelID]
 	end
 	
+	--Tell the current map that it is being switched away from
 	self.entities.map:sleep()
 	
+	--Unregister everything except the player from the entity list
 	local player = self.entities.player
-	
 	self.entities = {}
 	self.entities.player = player
+
+	--If the map that the player is going to already exists, then tell that map to wake up
 	if nextMap then
 		self.entities.map = nextMap
 		self.entities.map:awaken()
 	else
+		--Otherwise, create a new map
 		nextMap = Map(self, exitTunnelID)
 		self.entities.map = nextMap
 	end
-	print(id)
-	print(nextMap)
 end
 
--- connect tunnel IDs to their transitions (?)
+-- Register each tunnel exit as leading to some map
 function Game:registerMapTunnelIDs(map, tunnelIDs)
 	for _, id in ipairs(tunnelIDs) do
 		self.tunnelTransitions[id] = map
 	end
 end
 
--- 
+-- Generate a new tunnel exit, with the option to connect it to some existing tunnel exit
 function Game:generateNewTunnelID(shouldPairWithPreviousTunnel, pairingTunnelID)
 	if shouldPairWithPreviousTunnel and #self.unpairedTunnelIDs > 0 then
 		local id = pairingTunnelID
