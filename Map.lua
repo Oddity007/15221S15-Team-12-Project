@@ -3,6 +3,7 @@ local Map = Class()
 
 local Cannon = require "Cannon"
 local SceneryEntity = require "SceneryEntity"
+local Collectable = require "Collectable"
 local Tunnel = require "Tunnel"
 
 --[[
@@ -27,6 +28,14 @@ function Map:__init__(game, entranceTunnelID)
 		self.game:addEntity(entity)
 		self:addEntity(entity)
 	end	
+
+	for i=1,math.random(1, 20) do
+		local x = width * math.random()
+		local y = height * math.random()
+		local collect = Collectable(self.game, x, y)
+		self.game:addEntity(collect)
+		self:addEntity(collect)
+	end
 
 	--Generate the Tunnel object corresponding to the exit that the player should be entering the map through
 	local tunnels = {}
