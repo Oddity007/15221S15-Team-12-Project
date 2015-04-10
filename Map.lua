@@ -16,7 +16,7 @@ The Map
 function Map:__init__(game, entranceTunnelID)
 	self.game = game
 	self.entities = {}
-	
+
 	local width = love.graphics.getWidth()
 	local height = love.graphics.getHeight()
 
@@ -27,7 +27,7 @@ function Map:__init__(game, entranceTunnelID)
 		entity:setRestitution(math.random() * 2)
 		self.game:addEntity(entity)
 		self:addEntity(entity)
-	end	
+	end
 
 	for i=1,math.random(1, 20) do
 		local x = width * math.random()
@@ -35,6 +35,16 @@ function Map:__init__(game, entranceTunnelID)
 		local collect = Collectable(self.game, x, y)
 		self.game:addEntity(collect)
 		self:addEntity(collect)
+	end
+
+	for i=1,math.random(1, 10) do
+		local x = width * math.random()
+		local y = height * math.random()
+		local numKinds = 5
+		local kind = math.random(numKinds)
+		local powerup = Powerup(self.game, x, y, kind)
+		self.game:addEntity(powerup)
+		self:addEntity(powerup)
 	end
 
 	--Generate the Tunnel object corresponding to the exit that the player should be entering the map through

@@ -22,6 +22,7 @@ function Game:__init__()
 	self.camera = {position = {x = 0, y = 0}, scale = 1}
 
 	--Forwards a collision message to colliding entities
+	-- !!!!!!!!!!!!!!! What is contact?
 	local function postSolveCallback(fixture1, fixture2, contact)
 		local entity1 = fixture1:getUserData()
 		local entity2 = fixture2:getUserData()
@@ -80,10 +81,10 @@ function Game:enterTunnel(id)
 	if exitTunnelID then
 		nextMap = self.tunnelTransitions[exitTunnelID]
 	end
-	
+
 	--Tell the current map that it is being switched away from
 	self.entities.map:sleep()
-	
+
 	--Unregister everything except the player from the entity list
 	local player = self.entities.player
 	self.entities = {}
@@ -118,7 +119,7 @@ function Game:generateNewTunnelID(shouldPairWithPreviousTunnel, pairingTunnelID)
 					break
 				end
 			end
-			
+
 		else
 			id = self.unpairedTunnelIDs[#self.unpairedTunnelIDs]
 			self.unpairedTunnelIDs[#self.unpairedTunnelIDs] = nil
