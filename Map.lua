@@ -4,6 +4,7 @@ local Map = Class()
 local Cannon = require "Cannon"
 local SceneryEntity = require "SceneryEntity"
 local Collectable = require "Collectable"
+local Powerup = require "Powerup"
 local Tunnel = require "Tunnel"
 
 --[[

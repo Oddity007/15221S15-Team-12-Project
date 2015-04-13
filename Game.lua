@@ -5,6 +5,8 @@ local Player = require "Player"
 local Cannon = require "Cannon"
 local Map = require "Map"
 local Tunnel = require "Tunnel"
+local Collectable = require "Collectable"
+local Powerup = require "Powerup"
 
 --[[The Game class controls everything that happens in the game at a high
 	level.
@@ -46,6 +48,7 @@ function Game:__init__()
 	love.graphics.setBackgroundColor(255, 255, 255)
 
 	self.timeDilation = 1
+	self.timeOffset = 0
 end
 
 --Register an entity for events
@@ -70,6 +73,11 @@ end
 --Control Time Dilation (Game time relative to player time)
 function Game:setTimeDilation(to)
 	self.timeDilation = to
+end
+
+--Add to or remove from Time Offset (Game time relative to player time)
+function Game:setTime(to)
+	self.timeOffset = to
 end
 
 -- process what happens when player enters a tunnel
@@ -150,7 +158,10 @@ end
 
 -- update everything in the game (called each update loop)
 function Game:onUpdate(seconds)
-	seconds = seconds * self.timeDilation
+	seconds = (seconds + self.timeOffset) * self.timeDilation
+	if seconds < 0 then
+		seconds = 0
+	end
 
 	for _, entity in pairs(self.entities) do
 		local f = entity.beforePhysicsUpdate

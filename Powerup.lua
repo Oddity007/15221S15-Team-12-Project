@@ -1,35 +1,35 @@
 local Class = require "Class"
 local Powerup = Class()
 
---[[The Powerup class is for indistinguishable objects that
-	add to a score count when the player touches them.
+local PowerupFactory = require "PowerupFactory"
+
+--[[The Powerup class is for powerup objects that
+	add temporary effects to the game.
+	Time Slow/Fast
+	Momentum Gain/Loss
 --]]
 
 -- initialize Powerup object
 function Powerup:__init__(game, x, y, kind)
 	self.game = game
-	self.radius = 5
+	self.radius = 15
 	local mass = 1
 	self.shape = love.physics.newCircleShape(self.radius)
 	self.body = love.physics.newBody(game.world, x, y, "static")
 	self.fixture = love.physics.newFixture(self.body, self.shape, mass)
 	self.fixture:setUserData(self)
 
-	--self.kind = PowerupFactory(kind)
-
-	--will not need to set this once PowerupFactory is made
-	self.image = self.game.assetManager:acquire("Assets/FairyTest.png")
+	self.kind = PowerupFactory(kind, game)
 end
 
 -- draw Powerup
 function Powerup:onRender()
 	love.graphics.setColor(0, 0, 255, 255)
 	local x, y = self:getPosition()
-	local numberOfSegments = 50
-	love.graphics.circle("fill", x, y, self.radius, numberOfSegments)
+	--local numberOfSegments = 50
+	--love.graphics.circle("fill", x, y, self.radius, numberOfSegments)
 
-	--love.graphics.draw(kind.image, x, y, 0, 0.1, 0.1, 0, 0)
-	love.graphics.draw(self.image, x, y, 0, 0.1, 0.1, 0, 0)
+	love.graphics.draw(self.kind.image, x - self.radius, y - self.radius, 0, 0.4, 0.4, 0, 0)
 end
 
 -- process collision with Powerup
@@ -41,9 +41,10 @@ function Powerup:onCollision(contact, otherEntity)
 	self.game:removeEntity(self)
 end
 
-function Powerup:setRestitution(to)
+--[[function Powerup:setRestitution(to)
 	self.fixture:setRestitution(to)
 end
+]]--
 
 -- get the Powerup's position as (x,y) coordinates
 function Powerup:getPosition()
