@@ -9,9 +9,9 @@ local Collectable = Class()
 function Collectable:__init__(game, x, y)
 	self.game = game
 	self.radius = 5
-	local mass = 1
+	local mass = 0.00001
 	self.shape = love.physics.newCircleShape(self.radius)
-	self.body = love.physics.newBody(game.world, x, y, "static")
+	self.body = love.physics.newBody(game.world, x, y, "dynamic")
 	self.fixture = love.physics.newFixture(self.body, self.shape, mass)
 	self.fixture:setUserData(self)
 end

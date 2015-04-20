@@ -9,15 +9,17 @@ local SceneryEntity = Class()
 function SceneryEntity:__init__(game, x, y)
 	self.game = game
 	self.radius = 10
-	local mass = 1
+	self.mass = 1
+	self.restitution = 1
 	self.shape = love.physics.newCircleShape(self.radius)
 	self.body = love.physics.newBody(game.world, x, y, "static")
-	self.fixture = love.physics.newFixture(self.body, self.shape, mass)
+	self.fixture = love.physics.newFixture(self.body, self.shape, self.mass)
 	self.fixture:setUserData(self)
-	self.fixture:setRestitution(1)
+	self.fixture:setRestitution(self.restitution)
 end
 
 function SceneryEntity:setRestitution(to)
+	self.restitution = to
 	self.fixture:setRestitution(to)
 end
 
@@ -43,9 +45,9 @@ end
 -- prepare SceneryEntity for collisions
 function SceneryEntity:awaken(map)
 	self.body:isActive(true)
-	self.fixture = love.physics.newFixture(self.body, self.shape, mass)
+	self.fixture = love.physics.newFixture(self.body, self.shape, self.mass)
 	self.fixture:setUserData(self)
-	self.fixture:setRestitution(0.9)
+	self.fixture:setRestitution(self.restitution)
 end
 
 -- stop checking SceneryEntity for collisions

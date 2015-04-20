@@ -49,7 +49,7 @@ end
 
 -- update forces on Player depending on player input
 function Player:beforePhysicsUpdate(seconds)
-	local force = 100
+	local force = 50
 	local velocityX, velocityY = self.body:getLinearVelocity()
 
 
@@ -90,7 +90,7 @@ function Player:afterPhysicsUpdate(seconds)
 	local dampingFactor = -1
 	self.body:applyForce(dampingFactor * velocityX, dampingFactor * velocityY)
 
-	-- to limit velocity; not done yet; does not take into account cannons
+	--[[-- to limit velocity; not done yet; does not take into account cannons
 	if velocityX > 15 then
 		velocityX = 15
 	elseif velocityX < -15 then
@@ -108,7 +108,7 @@ function Player:afterPhysicsUpdate(seconds)
 		velocityX = -7.5
 		velocityY = -7.5
 	end
-	self.body:setLinearVelocity(velocityX, velocityY)
+	self.body:setLinearVelocity(velocityX, velocityY)]]
 end
 
 -- NYI

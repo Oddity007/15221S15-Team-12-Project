@@ -38,7 +38,7 @@ function Game:__init__()
 	self.tunnelIDs = {}
 	self.tunnelTransitions = {}
 	--Start off with a single tunnel exit that player starts out of
-	self.startingTunnelID = self:generateNewTunnelID(false)
+	--self.startingTunnelID = self:generateNewTunnelID(false)
 
 	--prepare (collidable) entities
 	self.entities = {}
@@ -88,7 +88,10 @@ function Game:enterTunnel(id)
 	--If the tunnel entrance has an existing exit, then find the map that's it leads to
 	if exitTunnelID then
 		nextMap = self.tunnelTransitions[exitTunnelID]
+		assert(nextMap)
 	end
+
+	--print("Entering tunnel:", id, "Map: ", self.entities.map)
 
 	--Tell the current map that it is being switched away from
 	self.entities.map:sleep()
@@ -100,19 +103,27 @@ function Game:enterTunnel(id)
 
 	--If the map that the player is going to already exists, then tell that map to wake up
 	if nextMap then
+		assert(exitTunnelID)
 		self.entities.map = nextMap
-		self.entities.map:awaken()
+		self.entities.map:awaken(exitTunnelID)
 	else
+		assert(not exitTunnelID)
 		--Otherwise, create a new map
-		nextMap = Map(self, exitTunnelID)
+		nextMap = Map(self, id)
 		self.entities.map = nextMap
 	end
+
+	--print("Exiting tunnel:", exitTunnelID, "Map: ", self.entities.map)
 end
 
 -- Register each tunnel exit as leading to some map
 function Game:registerMapTunnelIDs(map, tunnelIDs)
 	for _, id in ipairs(tunnelIDs) do
+		assert(not self.tunnelTransitions[id])
 		self.tunnelTransitions[id] = map
+	end
+	for _, id in ipairs(self.unpairedTunnelIDs) do
+		assert(self.tunnelTransitions[id])
 	end
 end
 
@@ -129,13 +140,15 @@ function Game:generateNewTunnelID(shouldPairWithPreviousTunnel, pairingTunnelID)
 			end
 
 		else
-			id = self.unpairedTunnelIDs[#self.unpairedTunnelIDs]
+			local randomIndex = math.random(1, #self.unpairedTunnelIDs)
+			id = self.unpairedTunnelIDs[randomIndex]
+			self.unpairedTunnelIDs[randomIndex] = self.unpairedTunnelIDs[#self.unpairedTunnelIDs]
 			self.unpairedTunnelIDs[#self.unpairedTunnelIDs] = nil
 		end
 		local newID =  #self.tunnelIDs + 1
 		self.tunnelIDs[id] = newID
 		self.tunnelIDs[newID] = id
-		return id
+		return newID
 	else
 		local id =  #self.tunnelIDs + 1
 		self.unpairedTunnelIDs[#self.unpairedTunnelIDs + 1] = id
