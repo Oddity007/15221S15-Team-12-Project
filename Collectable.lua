@@ -35,6 +35,7 @@ function Collectable:onCollision(contact, otherEntity)
 	self.fixture:destroy()
 	self.game.entities.map:removeEntity(self)
 	self.game:removeEntity(self)
+	self.game.collectableCount = self.game.collectableCount + 1;
 end
 
 function Collectable:setRestitution(to)

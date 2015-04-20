@@ -54,6 +54,8 @@ function Game:__init__()
 
 	love.graphics.setBackgroundColor(255, 255, 255)
 
+	self.collectableCount = 0;
+
 	self.timeDilation = 1
 	self.timeOffset = 0
 end
@@ -173,6 +175,11 @@ function Game:onRender()
 		local f = entity.onRender
 		if f then f(entity) end
 	end
+
+	--User interface
+	love.graphics.setColor(150, 150, 150, 255)
+	love.graphics.print("Collected: " .. self.collectableCount, 10, 580)
+
 	love.graphics.pop()
 end
 

@@ -5,7 +5,7 @@ local ItemTracker = Class()
 --]]
 
 -- initialize Item object
-function Item:__init__(game, x, y)
+function Item:__init__(game)
 	self.game = game
 	self.collectedItems = {}
 	self.uncollectedItems = {} --add items to collect!
