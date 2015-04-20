@@ -61,6 +61,7 @@ function PowerupFactory:awaken(map)
 	self.body:isActive(true)
 	self.fixture = love.physics.newFixture(self.body, self.shape, mass)
 	self.fixture:setUserData(self)
+	self.bodyStatus = true
 end
 
 -- Process contact with powerup
@@ -101,6 +102,7 @@ end
 function PowerupFactory:sleep(map)
 	self.body:isActive(false)
 	self.fixture:destroy()
+	self.bodyStatus = false
 end
 
 -- get the Powerup's position as (x,y) coordinates

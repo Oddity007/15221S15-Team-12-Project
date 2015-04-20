@@ -10,7 +10,7 @@ local Rectangle = require "Rectangle"
 -- initialize Player object
 function Player:__init__(game)
 	self.game = game
-	self.radius = 32
+	self.radius = 16
 	local startX, startY = 0, 0
 	local mass = 1
 	self.shape = love.physics.newCircleShape(self.radius)
@@ -75,14 +75,18 @@ function Player:onRender()
 
 	love.graphics.setColor(255, 255, 255, 255)
 	-- makes the image center the center of the object
-	love.graphics.draw(self.image, x - self.radius, y - self.radius, 0, 1.0, 1.0, 0, 0)
+	love.graphics.draw(self.image, x - self.radius, y - self.radius, 0, 1/4, 1/4, 0, 0)
 
 	love.graphics.setColor(0, 0, 0, 255)
 end
 
 -- update forces on Player depending on player input
 function Player:beforePhysicsUpdate(seconds)
+--<<<<<<< HEAD
 	local force = 200
+--=======
+	--local force = 50
+-->>>>>>> 0603a07b204b577ecd3b0115072ad2544bb5bf73
 	local velocityX, velocityY = self.body:getLinearVelocity()
 
 	if self.index == 119 then

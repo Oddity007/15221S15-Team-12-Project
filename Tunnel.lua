@@ -12,6 +12,7 @@ function Tunnel:__init__(game, x, y, id)
 	self.x = x
 	self.y = y
 	self.id = id
+	self.shouldWaitUntilPlayerLeaves = false
 end
 
 -- get the Tunnel's position as (x,y) coordinates
@@ -37,7 +38,11 @@ function Tunnel:beforePhysicsUpdate(seconds)
 	local cx, cy = player:getPosition()
 	local dx, dy = (px - cx), (py - cy)
 	if dx * dx + dy * dy < self.radius * self.radius then
-		self.game:enterTunnel(self.id)
+		if not self.shouldWaitUntilPlayerLeaves then
+			self.game:enterTunnel(self.id)
+		end
+	else
+		self.shouldWaitUntilPlayerLeaves = false
 	end
 end
 
