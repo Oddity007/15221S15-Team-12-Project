@@ -1,6 +1,8 @@
 local Class = require "Class"
 local Player = Class()
 
+local Rectangle = require "Rectangle"
+
 --[[The Player class represents the player character in the game. It
 	includes methods to move and display the character.
 --]]
@@ -8,17 +10,48 @@ local Player = Class()
 -- initialize Player object
 function Player:__init__(game)
 	self.game = game
-	self.radius = 20
+	self.radius = 32
 	local startX, startY = 0, 0
 	local mass = 1
 	self.shape = love.physics.newCircleShape(self.radius)
 	self.body = love.physics.newBody(game.world, startX, startY, "dynamic")
-	self.body:setLinearDamping(0.1)
 	self.fixture = love.physics.newFixture(self.body, self.shape, mass)
 	self.fixture:setUserData(self)
 	self.fixture:setRestitution(0.9)
 
-	self.cloudImage = self.game.assetManager:acquire("Assets/ExampleImage.lua")
+	self.frontImage =
+	self.game.assetManager:acquire("Assets/CharacterSprites/BoyFront.lua")
+	self.frontImageStep1 =
+	self.game.assetManager:acquire("Assets/CharacterSprites/BoyFront1.lua")
+	self.frontImageStep2 =
+	self.game.assetManager:acquire("Assets/CharacterSprites/BoyFront2.lua")
+
+	self.sideImageLeft =
+	self.game.assetManager:acquire("Assets/CharacterSprites/BoySideLeft.lua")
+	self.sideImageLeftStep1 =
+	self.game.assetManager:acquire("Assets/CharacterSprites/BoySideLeft1.lua")
+	self.sideImageLeftStep2 =
+	self.game.assetManager:acquire("Assets/CharacterSprites/BoySideLeft2.lua")
+
+	self.sideImageRight =
+	self.game.assetManager:acquire("Assets/CharacterSprites/BoySideRight.lua")
+	self.sideImageRightStep1 =
+	self.game.assetManager:acquire("Assets/CharacterSprites/BoySideRight1.lua")
+	self.sideImageRightStep2 =
+	self.game.assetManager:acquire("Assets/CharacterSprites/BoySideRight2.lua")
+
+	self.backImage =
+	self.game.assetManager:acquire("Assets/CharacterSprites/BoyBack.lua")
+	self.backImageStep1 =
+	self.game.assetManager:acquire("Assets/CharacterSprites/BoyBack1.lua")
+	self.backImageStep2 =
+	self.game.assetManager:acquire("Assets/CharacterSprites/BoyBack2.lua")
+
+	self.image = self.frontImage
+	self.index = 0
+	--self.frames = {self.frontImage, self.backImage}
+
+
 end
 
 -- get the Player's position as (x,y) coordinates
@@ -42,35 +75,73 @@ function Player:onRender()
 
 	love.graphics.setColor(255, 255, 255, 255)
 	-- makes the image center the center of the object
-	love.graphics.draw(self.cloudImage, x - self.radius, y - self.radius, 0, 0.1, 0.1, 0, 0)
+	love.graphics.draw(self.image, x - self.radius, y - self.radius, 0, 1.0, 1.0, 0, 0)
 
 	love.graphics.setColor(0, 0, 0, 255)
 end
 
 -- update forces on Player depending on player input
 function Player:beforePhysicsUpdate(seconds)
-	local force = 100
+	local force = 200
 	local velocityX, velocityY = self.body:getLinearVelocity()
 
+	if self.index == 119 then
+		self.index = 0
+	else
+		self.index = self.index + 1
+	end
 
 	--up
 	if love.keyboard.isDown("w") then
 		self.body:applyForce(0, -force)
+		--[[self.image = self.frames[index]
+		if not self.image then
+			print("wtf", self.index)
+		end]]--
+		--self.image = self.backImage
+		if self.index == 0 or self.index == 60 then
+			self.image = self.backImage
+		elseif self.index == 30 then
+			self.image = self.backImageStep1
+		elseif self.index == 90 then
+			self.image = self.backImageStep2
+		end
 	end
 
 	--down
 	if love.keyboard.isDown("s") then
 		self.body:applyForce(0, force)
+		if self.index == 0 or self.index == 60 then
+			self.image = self.frontImage
+		elseif self.index == 30 then
+			self.image = self.frontImageStep1
+		elseif self.index == 90 then
+			self.image = self.frontImageStep2
+		end
 	end
 
 	--left
 	if love.keyboard.isDown("a") then
 		self.body:applyForce(-force, 0)
+		if self.index == 0 or self.index == 60 then
+			self.image = self.sideImageLeft
+		elseif self.index == 30 then
+			self.image = self.sideImageLeftStep1
+		elseif self.index == 90 then
+			self.image = self.sideImageLeftStep2
+		end
 	end
 
 	--right
 	if love.keyboard.isDown("d") then
 		self.body:applyForce(force, 0)
+		if self.index == 0 or self.index == 60 then
+			self.image = self.sideImageRight
+		elseif self.index == 30 then
+			self.image = self.sideImageRightStep1
+		elseif self.index == 90 then
+			self.image = self.sideImageRightStep2
+		end
 	end
 
 	--slow time
@@ -82,33 +153,15 @@ function Player:beforePhysicsUpdate(seconds)
 end
 
 -- implements the damping portion of a spring-damper system
---[[ Need to find a way to communicate with this method to apply physics
- effects based off of what the player hit!  Changed dampingFactor to something
- that is sent in.  Original code is commented out, does not work for now.]]--
 function Player:afterPhysicsUpdate(seconds)
 	local velocityX, velocityY = self.body:getLinearVelocity()
-	local dampingFactor = -1
+	local dampingFactor = -10
 	self.body:applyForce(dampingFactor * velocityX, dampingFactor * velocityY)
+end
 
-	-- to limit velocity; not done yet; does not take into account cannons
-	if velocityX > 15 then
-		velocityX = 15
-	elseif velocityX < -15 then
-		velocityX = -15
-	end
-	if velocityY > 15 then
-		velocityY = 15
-	elseif velocityY < -15 then
-		velocityY = -15
-	end
-	if velocityX + velocityY > 15 then
-		velocityX = 7.5
-		velocityY = 7.5
-	elseif velocityX + velocityY < -15 then
-		velocityX = -7.5
-		velocityY = -7.5
-	end
-	self.body:setLinearVelocity(velocityX, velocityY)
+-- NYI
+function Player:onContact(contact, otherEntity)
+
 end
 
 -- NYI

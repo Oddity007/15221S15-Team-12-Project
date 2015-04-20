@@ -24,14 +24,21 @@ function Game:__init__()
 	self.camera = {position = {x = 0, y = 0}, scale = 1}
 
 	--Forwards a collision message to colliding entities
-	-- !!!!!!!!!!!!!!! What is contact?
 	local function postSolveCallback(fixture1, fixture2, contact)
 		local entity1 = fixture1:getUserData()
 		local entity2 = fixture2:getUserData()
 		if entity1 then entity1:onCollision(contact, entity2) end
 		if entity2 then entity2:onCollision(contact, entity1) end
 	end
-	self.world:setCallbacks(nil, nil, nil, postSolveCallback)
+
+	--Forwards an end contact message to touching entities
+	local function onContact(fixture1, fixture2, contact)
+		local entity1 = fixture1:getUserData()
+		local entity2 = fixture2:getUserData()
+		if entity1 then entity1:onContact(contact, entity2) end
+		if entity2 then entity2:onContact(contact, entity1) end
+	end
+	self.world:setCallbacks(onContact, nil, nil, postSolveCallback)
 
 	--prepare tunnels
 	self.unpairedTunnelIDs = {}
@@ -76,8 +83,8 @@ function Game:setTimeDilation(to)
 end
 
 --Add to or remove from Time Offset (Game time relative to player time)
-function Game:setTime(to)
-	self.timeOffset = to
+function Game:addTimeOffset(to)
+	self.timeOffset = self.timeOffset + to
 end
 
 -- process what happens when player enters a tunnel
@@ -158,10 +165,7 @@ end
 
 -- update everything in the game (called each update loop)
 function Game:onUpdate(seconds)
-	seconds = (seconds + self.timeOffset) * self.timeDilation
-	if seconds < 0 then
-		seconds = 0
-	end
+	seconds = seconds * self.timeDilation
 
 	for _, entity in pairs(self.entities) do
 		local f = entity.beforePhysicsUpdate

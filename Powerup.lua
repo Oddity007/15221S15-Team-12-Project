@@ -10,59 +10,49 @@ local PowerupFactory = require "PowerupFactory"
 --]]
 
 -- initialize Powerup object
-function Powerup:__init__(game, x, y, kind)
+function Powerup:__init__(game, x, y)
 	self.game = game
-	self.radius = 15
-	local mass = 1
-	self.shape = love.physics.newCircleShape(self.radius)
-	self.body = love.physics.newBody(game.world, x, y, "static")
-	self.fixture = love.physics.newFixture(self.body, self.shape, mass)
-	self.fixture:setUserData(self)
-
-	self.kind = PowerupFactory(kind, game)
+	self.kind = PowerupFactory(game, x, y)
 end
 
 -- draw Powerup
 function Powerup:onRender()
-	love.graphics.setColor(0, 0, 255, 255)
-	local x, y = self:getPosition()
-	--local numberOfSegments = 50
-	--love.graphics.circle("fill", x, y, self.radius, numberOfSegments)
-
-	love.graphics.draw(self.kind.image, x - self.radius, y - self.radius, 0, 0.4, 0.4, 0, 0)
+	local x, y
+	love.graphics.setColor(255, 255, 255, 255)
+	if self.kind.bodyStatus then
+		x, y = self.kind:getPosition()
+		love.graphics.draw(self.kind.image,
+						   x - self.kind.radius,
+						   y - self.kind.radius,
+						   0, 0.5, 0.5, 0, 0)
+	end
 end
 
--- process collision with Powerup
-function Powerup:onCollision(contact, otherEntity)
+-- process contact with Powerup
+function Powerup:onContact(contact, otherEntity)
     --Apply effect based on kind
-	self.body:destroy()
-	self.fixture:destroy()
+	self.kind:endContact(contact, otherEntity)
 	self.game.entities.map:removeEntity(self)
 	self.game:removeEntity(self)
 end
 
---[[function Powerup:setRestitution(to)
-	self.fixture:setRestitution(to)
-end
-]]--
+function Powerup:afterPhysicsUpdate(seconds)
 
--- get the Powerup's position as (x,y) coordinates
-function Powerup:getPosition()
-	local x, y = self.body:getPosition()
-	return x, y
 end
 
 -- prepare Powerup for collisions
 function Powerup:awaken(map)
-	self.body:isActive(true)
-	self.fixture = love.physics.newFixture(self.body, self.shape, mass)
-	self.fixture:setUserData(self)
+	self.kind:awaken(map)
 end
 
 -- stop checking Powerup for collisions
 function Powerup:sleep(map)
-	self.body:isActive(false)
-	self.fixture:destroy()
+	self.kind:sleep(map)
+end
+
+-- get the Powerup's position as (x,y) coordinates
+function Powerup:getPosition()
+	return self.kind:getPosition()
 end
 
 return Powerup

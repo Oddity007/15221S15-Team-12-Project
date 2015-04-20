@@ -24,6 +24,11 @@ function Collectable:onRender()
 	love.graphics.circle("fill", x, y, self.radius, numberOfSegments)
 end
 
+-- NYI
+function Collectable:onContact(contact, otherEntity)
+
+end
+
 -- process collision with Collectable
 function Collectable:onCollision(contact, otherEntity)
 	self.body:destroy()

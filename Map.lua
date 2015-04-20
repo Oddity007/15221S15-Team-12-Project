@@ -41,9 +41,7 @@ function Map:__init__(game, entranceTunnelID)
 	for i=1,math.random(1, 10) do
 		local x = width * math.random()
 		local y = height * math.random()
-		local numKinds = 5
-		local kind = math.random(numKinds)
-		local powerup = Powerup(self.game, x, y, kind)
+		local powerup = Powerup(self.game, x, y)
 		self.game:addEntity(powerup)
 		self:addEntity(powerup)
 	end

@@ -35,9 +35,14 @@ function SceneryEntity:onRender()
 	love.graphics.circle("fill", x, y, self.radius, numberOfSegments)
 end
 
+-- NYI
+function SceneryEntity:onContact(contact, otherEntity)
+
+end
+
 -- process collision with SceneryEntity
 function SceneryEntity:onCollision(contact, otherEntity)
-	local body = otherEntity.body	
+	local body = otherEntity.body
 end
 
 -- prepare SceneryEntity for collisions

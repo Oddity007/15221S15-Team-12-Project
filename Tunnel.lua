@@ -22,9 +22,9 @@ end
 
 -- draw Tunnel
 function Tunnel:onRender()
-	love.graphics.setColor(0, 0, 0, 255)
+	--love.graphics.setColor(0, 0, 0, 255)
 	local x, y = self:getPosition()
-	local numberOfSegments = 50
+	--local numberOfSegments = 50
 	love.graphics.setColor(255, 255, 0)
 	love.graphics.circle("fill", x, y, self.radius, numberOfSegments)
 	love.graphics.setColor(0, 0, 0)
