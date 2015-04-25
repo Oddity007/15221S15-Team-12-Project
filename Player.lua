@@ -10,7 +10,7 @@ local Rectangle = require "Rectangle"
 -- initialize Player object
 function Player:__init__(game)
 	self.game = game
-	self.radius = 16
+	self.radius = 8
 	local startX, startY = 0, 0
 	local mass = 1
 	self.shape = love.physics.newCircleShape(self.radius)
@@ -71,11 +71,13 @@ function Player:onRender()
 	local x, y = self:getPosition()
 	--more segments makes for a smoother circle but takes more resources
 	--local numberOfSegments = 50
-	--love.graphics.circle("fill", x, y, self.radius, numberOfSegments)
+	love.graphics.circle("fill", x, y, self.radius, numberOfSegments)
 
 	love.graphics.setColor(255, 255, 255, 255)
 	-- makes the image center the center of the object
-	love.graphics.draw(self.image, x - self.radius, y - self.radius, 0, 1/4, 1/4, 0, 0)
+	--love.graphics.draw(self.image, x - self.radius, y - self.radius, 0, 1/4, 1/4, 0, 0)
+	local scale = 1/4
+	love.graphics.draw(self.image, x - self.image:getWidth()/2 * scale, y - self.radius, 0, scale, scale, 0, 0)
 
 	love.graphics.setColor(0, 0, 0, 255)
 end
@@ -95,8 +97,18 @@ function Player:beforePhysicsUpdate(seconds)
 		self.index = self.index + 1
 	end
 
+	local canWalk = self:canWalk()
+
+	--slow time
+	if love.keyboard.isDown("lshift") then
+		self.game:setTimeDilation(1/8)
+		canWalk = true
+	else
+		self.game:setTimeDilation(1)
+	end
+
 	--up
-	if love.keyboard.isDown("w") then
+	if love.keyboard.isDown("w") and canWalk then
 		self.body:applyForce(0, -force)
 		--[[self.image = self.frames[index]
 		if not self.image then
@@ -113,7 +125,7 @@ function Player:beforePhysicsUpdate(seconds)
 	end
 
 	--down
-	if love.keyboard.isDown("s") then
+	if love.keyboard.isDown("s") and canWalk then
 		self.body:applyForce(0, force)
 		if self.index == 0 or self.index == 60 then
 			self.image = self.frontImage
@@ -125,7 +137,7 @@ function Player:beforePhysicsUpdate(seconds)
 	end
 
 	--left
-	if love.keyboard.isDown("a") then
+	if love.keyboard.isDown("a") and canWalk then
 		self.body:applyForce(-force, 0)
 		if self.index == 0 or self.index == 60 then
 			self.image = self.sideImageLeft
@@ -137,7 +149,7 @@ function Player:beforePhysicsUpdate(seconds)
 	end
 
 	--right
-	if love.keyboard.isDown("d") then
+	if love.keyboard.isDown("d") and canWalk then
 		self.body:applyForce(force, 0)
 		if self.index == 0 or self.index == 60 then
 			self.image = self.sideImageRight
@@ -147,20 +159,22 @@ function Player:beforePhysicsUpdate(seconds)
 			self.image = self.sideImageRightStep2
 		end
 	end
-
-	--slow time
-	if love.keyboard.isDown("lshift") then
-		self.game:setTimeDilation(1/8)
-	else
-		self.game:setTimeDilation(1)
-	end
 end
 
 -- implements the damping portion of a spring-damper system
 function Player:afterPhysicsUpdate(seconds)
 	local velocityX, velocityY = self.body:getLinearVelocity()
-	local dampingFactor = -10
+	local dampingFactor = -0.01
+	if self:canWalk() then
+		dampingFactor = -10
+	end
 	self.body:applyForce(dampingFactor * velocityX, dampingFactor * velocityY)
+end
+
+function Player:canWalk()
+	local velocityX, velocityY = self.body:getLinearVelocity()
+	local squaredSpeed = velocityX * velocityX + velocityY * velocityY
+	return squaredSpeed < 10000
 end
 
 -- NYI

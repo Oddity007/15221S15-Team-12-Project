@@ -12,8 +12,9 @@ local PowerupFactory = Class()
 
 -- initialize PowerupFactory object
 -- sets kind to
-function PowerupFactory:__init__(game, x, y)
+function PowerupFactory:__init__(game, x, y, owningPowerup)
 	local numKinds = 100
+	self.owningPowerup = owningPowerup
 	self.kind = math.random(numKinds)
     self.game = game
     self.radius = 16
@@ -95,6 +96,7 @@ function PowerupFactory:onContact(contact, otherEntity)
     self.body:destroy()
 	self.fixture:destroy()
 	self.bodyStatus = false
+	self.owningPowerup:onContact(contact, otherEntity)
 end
 
 

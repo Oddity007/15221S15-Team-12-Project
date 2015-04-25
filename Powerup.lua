@@ -12,7 +12,7 @@ local PowerupFactory = require "PowerupFactory"
 -- initialize Powerup object
 function Powerup:__init__(game, x, y)
 	self.game = game
-	self.kind = PowerupFactory(game, x, y)
+	self.kind = PowerupFactory(game, x, y, self)
 end
 
 -- draw Powerup
@@ -31,7 +31,7 @@ end
 -- process contact with Powerup
 function Powerup:onContact(contact, otherEntity)
     --Apply effect based on kind
-	self.kind:endContact(contact, otherEntity)
+	--self.kind:onContact(contact, otherEntity)
 	self.game.entities.map:removeEntity(self)
 	self.game:removeEntity(self)
 end

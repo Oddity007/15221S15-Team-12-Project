@@ -253,10 +253,11 @@ function Map:__init__(game, entranceTunnelID)
 				occupancyGrid:reserveLineSegment(xs[k], ys[k], xs[k + 1], ys[k + 1], 10)
 				local x = xs[k]
 				local y = ys[k]
+				local impulseFactor = (math.random() + 1) * 1
 				local impulseX = xs[k + 1] - xs[k]
 				local impulseY = ys[k + 1] - ys[k]
-				impulseX = impulseX * (math.random() + 1)
-				impulseY = impulseY * (math.random() + 1)
+				impulseX = impulseX * impulseFactor
+				impulseY = impulseY * impulseFactor
 
 				--Generate collectables
 				for i=1,math.random(1, 20) do
