@@ -52,7 +52,7 @@ function Player:__init__(game)
 	self.index = 0
 	--self.frames = {self.frontImage, self.backImage}
 
-
+	self.freezeTimeRemaining = 0
 end
 
 -- get the Player's position as (x,y) coordinates
@@ -100,21 +100,42 @@ function Player:beforePhysicsUpdate(seconds)
 
 	local canWalk = self:canWalk()
 
-	--slow time
-	if love.keyboard.isDown("lshift") then
-		self.game:setTimeDilation(1/8)
-		canWalk = true
-	else
+	self.freezeTimeRemaining = self.freezeTimeRemaining - seconds
+
+	if self.freezeTimeRemaining < 0 then
+		self.freezeTimeRemaining = 0
 		self.game:setTimeDilation(1)
 	end
 
+	--slow time
+	if self.freezeTimeRemaining <= 0 and love.keyboard.isDown("lshift") then
+		self.game:setTimeDilation(1/32)
+		canWalk = true
+		self.freezeTimeRemaining = 2 / 32
+	end
+
+	if self.freezeTimeRemaining > 0 and love.mouse.isDown("l") then
+		local mx, my = love.mouse.getPosition()
+		local px, py = self:getPosition()
+		local dx, dy = mx - px, my - px
+		local magnitude = math.sqrt(dx * dx + dy * dy)
+		local speed = math.sqrt(velocityX * velocityX + velocityY * velocityY)
+		local minimumSpeed = 0
+		if speed < minimumSpeed then
+			speed = minimumSpeed
+		end
+		dx = dx / magnitude
+		dy = dy / magnitude
+		self.body:setLinearVelocity(dx * speed, dy * speed)
+	end
+	
 	--up
 	if love.keyboard.isDown("w") and canWalk then
 		self.body:applyForce(0, -force)
-		--[[self.image = self.frames[index]
-		if not self.image then
-			print("wtf", self.index)
-		end]]--
+		--self.image = self.frames[index]
+		--if not self.image then
+		--	print("wtf", self.index)
+		--end
 		--self.image = self.backImage
 		if self.index == 0 or self.index == 60 then
 			self.image = self.backImage
