@@ -56,10 +56,12 @@ function Game:__init__()
 
 	love.graphics.setBackgroundColor(255, 255, 255)
 
-	self.collectableCount = 0;
+	self.collectableCount = 0
 
 	self.timeDilation = 1
 	self.timeOffset = 0
+	self.timeTotal = 180.0
+	self.timePassed = 0.0
 end
 
 --Register an entity for events
@@ -172,6 +174,16 @@ end
 -- draw everything in the game (called each draw loop)
 function Game:onRender()
 	love.graphics.push()
+
+	if self.timePassed >= self.timeTotal then
+		love.graphics.setColor(150, 150, 150, 255)
+		love.graphics.rectangle("fill", 0, 0, 1000, 800)
+		love.graphics.setColor(0, 0, 0, 255)
+		love.graphics.print("Out of time")
+		love.graphics.pop()
+		return
+	end
+
 	love.graphics.scale(self.camera.scale)
 	love.graphics.translate(-self.camera.position.x, -self.camera.position.y)
 	for _, entity in pairs(self.entities) do
@@ -179,16 +191,23 @@ function Game:onRender()
 		if f then f(entity) end
 	end
 
-	--User interface
+	--Collectable count
 	love.graphics.setColor(150, 150, 150, 255)
 	love.graphics.print("Collected: " .. self.collectableCount, 10, 580)
 
+	--Timer bar
+	timeUp = self.timePassed/self.timeTotal
+    love.graphics.setColor(50, 200, 50, 255)
+    love.graphics.rectangle("fill", 750, 10, 20, 100)
+    love.graphics.setColor(200, 50, 50, 255)
+    love.graphics.rectangle("fill", 750, 10, 20, timeUp)
 	love.graphics.pop()
 end
 
 -- update everything in the game (called each update loop)
 function Game:onUpdate(seconds)
 	seconds = seconds * self.timeDilation
+	self.timePassed = self.timePassed + seconds
 
 	self.soundManager:update(seconds)
 
