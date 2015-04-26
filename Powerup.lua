@@ -34,6 +34,9 @@ function Powerup:onContact(contact, otherEntity)
 	--self.kind:onContact(contact, otherEntity)
 	self.game.entities.map:removeEntity(self)
 	self.game:removeEntity(self)
+	if otherEntity.isPlayer then
+		self.game.soundManager:play("Assets/Sounds/Pickup1.ogg", nil, false, 1/8)
+	end
 end
 
 function Powerup:afterPhysicsUpdate(seconds)

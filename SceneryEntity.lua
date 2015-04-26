@@ -39,7 +39,10 @@ end
 
 -- NYI
 function SceneryEntity:onContact(contact, otherEntity)
-
+	--Not really the correct way to do it
+	if otherEntity.isPlayer then
+		self.game.soundManager:play("Assets/Sounds/Launch.ogg", nil, false, 1/8)
+	end
 end
 
 -- process collision with SceneryEntity

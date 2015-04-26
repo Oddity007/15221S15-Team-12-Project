@@ -11,6 +11,7 @@ local Rectangle = require "Rectangle"
 function Player:__init__(game)
 	self.game = game
 	self.radius = 8
+	self.isPlayer = true
 	local startX, startY = 0, 0
 	local mass = 1
 	self.shape = love.physics.newCircleShape(self.radius)
@@ -166,7 +167,7 @@ function Player:afterPhysicsUpdate(seconds)
 	local velocityX, velocityY = self.body:getLinearVelocity()
 	local dampingFactor = -0.01
 	if self:canWalk() then
-		dampingFactor = -10
+		dampingFactor = -5
 	end
 	self.body:applyForce(dampingFactor * velocityX, dampingFactor * velocityY)
 end

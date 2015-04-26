@@ -3,6 +3,7 @@ local CurrentGame
 
 function love.load()
 	CurrentGame = Game()
+	love.audio.setVolume(0.1)
 end
 
 function love.draw()

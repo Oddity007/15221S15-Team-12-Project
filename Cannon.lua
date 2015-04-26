@@ -35,6 +35,7 @@ function Cannon:beforePhysicsUpdate(seconds)
 	local dx, dy = (px - cx), (py - cy)
 	if dx * dx + dy * dy < self.radius * self.radius then
 		player.body:applyLinearImpulse(self.launchImpulseX, self.launchImpulseY)
+		self.game.soundManager:play("Assets/Sounds/Launch.ogg", nil, false, 1/8)
 	end
 end
 

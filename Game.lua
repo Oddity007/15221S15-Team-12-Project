@@ -1,6 +1,7 @@
 local Class = require "Class"
 local Game = Class()
 local AssetManager = require "AssetManager"
+local SoundManager = require "SoundManager"
 local Player = require "Player"
 local Cannon = require "Cannon"
 local Map = require "Map"
@@ -19,6 +20,7 @@ local Powerup = require "Powerup"
 -- initialize the Game
 function Game:__init__()
 	self.assetManager = AssetManager()
+	self.soundManager = SoundManager()
 	self.world = love.physics.newWorld(0, 0, 0)
 
 	self.camera = {position = {x = 0, y = 0}, scale = 1}
@@ -143,7 +145,8 @@ function Game:generateNewTunnelID(shouldPairWithPreviousTunnel, pairingTunnelID)
 		if id then
 			for i, v in pairs(self.unpairedTunnelIDs) do
 				if v == id then
-					self.unpairedTunnelIDs[i] = nil
+					self.unpairedTunnelIDs[i] = self.unpairedTunnelIDs[#self.unpairedTunnelIDs]
+					self.unpairedTunnelIDs[#self.unpairedTunnelIDs] = nil
 					break
 				end
 			end
@@ -186,6 +189,8 @@ end
 -- update everything in the game (called each update loop)
 function Game:onUpdate(seconds)
 	seconds = seconds * self.timeDilation
+
+	self.soundManager:update(seconds)
 
 	for _, entity in pairs(self.entities) do
 		local f = entity.beforePhysicsUpdate

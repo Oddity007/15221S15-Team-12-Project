@@ -36,6 +36,9 @@ function Collectable:onCollision(contact, otherEntity)
 	self.game.entities.map:removeEntity(self)
 	self.game:removeEntity(self)
 	self.game.collectableCount = self.game.collectableCount + 1;
+	if otherEntity.isPlayer then
+		self.game.soundManager:play("Assets/Sounds/Pickup1.ogg", nil, false, 1/8)
+	end
 end
 
 function Collectable:setRestitution(to)
