@@ -200,7 +200,11 @@ function Game:onRender()
     love.graphics.setColor(50, 200, 50, 255)
     love.graphics.rectangle("fill", 750, 10, 20, 100)
     love.graphics.setColor(200, 50, 50, 255)
-    love.graphics.rectangle("fill", 750, 10, 20, timeUp)
+    love.graphics.rectangle("fill", 750, 10, 20, timeUp*100)
+
+    love.graphics.setColor(150, 150, 150, 255)
+	love.graphics.print("timeup: " .. timeUp, 10, 550)
+
 	love.graphics.pop()
 end
 
