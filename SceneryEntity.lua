@@ -10,7 +10,7 @@ function SceneryEntity:__init__(game, x, y)
 	self.game = game
 	self.radius = 10
 	self.mass = 1
-	self.restitution = 1
+	self.restitution = 0.75
 	self.shape = love.physics.newCircleShape(self.radius)
 	self.body = love.physics.newBody(game.world, x, y, "static")
 	self.fixture = love.physics.newFixture(self.body, self.shape, self.mass)

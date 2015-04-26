@@ -18,7 +18,7 @@ function Player:__init__(game)
 	self.body = love.physics.newBody(game.world, startX, startY, "dynamic")
 	self.fixture = love.physics.newFixture(self.body, self.shape, mass)
 	self.fixture:setUserData(self)
-	self.fixture:setRestitution(0.9)
+	self.fixture:setRestitution(0.75)
 
 	self.frontImage =
 	self.game.assetManager:acquire("Assets/CharacterSprites/BoyFront.lua")
@@ -86,7 +86,7 @@ end
 -- update forces on Player depending on player input
 function Player:beforePhysicsUpdate(seconds)
 --<<<<<<< HEAD
-	local force = 200
+	local force = 400
 --=======
 	--local force = 50
 -->>>>>>> 0603a07b204b577ecd3b0115072ad2544bb5bf73
@@ -165,7 +165,7 @@ end
 -- implements the damping portion of a spring-damper system
 function Player:afterPhysicsUpdate(seconds)
 	local velocityX, velocityY = self.body:getLinearVelocity()
-	local dampingFactor = -0.01
+	local dampingFactor = -0.1
 	if self:canWalk() then
 		dampingFactor = -5
 	end
