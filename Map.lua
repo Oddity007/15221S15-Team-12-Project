@@ -10,127 +10,53 @@ local ForestBorderEntity = require "ForestBorderEntity"
 
 local Rectangle = require "Rectangle"
 
---The occupancy grid allows us to detect whether the object we're placing will collide with something.  It's a slow hack, but it works for now until I implement something better.
---I would give it its own file, but it'll probably be gone soon
+--The occupancy cache allows us to detect whether the object we're placing will collide with something.  It's pretty easy to do better, but this works for now.
 
-local OccupancyGrid = Class()
+local OccupancyCache = Class()
 
-function OccupancyGrid:__init__(width, height)
+function OccupancyCache:__init__(width, height)
 	self.width = width
 	self.height = height
-	self.filterRatio = 10
-	self.image = love.image.newImageData(width, height)
-	self.filterImage = love.image.newImageData(width / self.filterRatio, height / self.filterRatio)
+	self.circles = {}
+	self.lines = {}
 end
 
-function OccupancyGrid:reserveCircle(cx, cy, radius)
-	local function f(x, y, r, g, b, a)
-		local dx = x - cx
-		local dy = y - cy
-		if dx * dx + dy * dy > radius * radius then
-			return r, g, b, a
-		end
-		return 1, g, b, a
-	end
-	self.image:mapPixel(f)
-
-	local function f(x, y, r, g, b, a)
-		x = self.filterRatio * x
-		y = self.filterRatio * y
-		local filterradius = self.filterRatio * 2 + radius
-		local dx = x - cx
-		local dy = y - cy
-		if dx * dx + dy * dy > filterradius * filterradius then
-			return r, g, b, a
-		end
-		return 1, g, b, a
-	end
-	self.filterImage:mapPixel(f)
+function OccupancyCache:reserveCircle(cx, cy, radius)
+	self.circles[#self.circles + 1] = {x = cx, y = cy, radius = radius}
 end
 
-function OccupancyGrid:circleIsUnreserved(sx, sy, radius)
-	local hadNoLowResolutionCollisions = true
-	for dy = -radius, radius, self.filterRatio do
-	for dx = -radius, radius, self.filterRatio do
-		local x = sx + dx
-		local y = sy + dy
-		if dx * dx + dy * dy <= radius * radius then
-			if x >= 0 and y >= 0 and x < self.width and y < self.height then
-				local r, g, b, a = self.filterImage:getPixel(x / self.filterRatio, y / self.filterRatio)
-				if r > 0 then
-					hadNoLowResolutionCollisions = false
-				end
-			end
+function OccupancyCache:circleIsUnreserved(sx, sy, radius)
+	for _, circle in ipairs(self.circles) do
+		local dx = sx - circle.x
+		local dy = sy - circle.y
+		local sr = circle.radius + radius
+		if dx * dx + dy * dy <= sr * sr then
+			return false
 		end
 	end
-	end
 
-	if hadNoLowResolutionCollisions then
-		return true
-	end
-
-	for dy = -radius, radius do
-	for dx = -radius, radius do
-		local x = sx + dx
-		local y = sy + dy
-		if dx * dx + dy * dy <= radius * radius then
-			if x >= 0 and y >= 0 and x < self.width and y < self.height then
-				local r, g, b, a = self.image:getPixel(x, y)
-				if r > 0 then
-					return false
-				end
-			end
+	for _, line in ipairs(self.lines) do
+		local rx = line.ex - line.sx
+		local ry = line.ey - line.sy
+		local sr = radius + line.thickness
+		local rmagnitude = math.sqrt(rx * rx + ry * ry)
+		rx = rx / rmagnitude
+		ry = ry / rmagnitude
+		local dx = sx - line.sx
+		local dy = sy - line.sy
+		local distanceAlongLine = dx * rx + dy * ry
+		dx = dx - rx * distanceAlongLine
+		dy = dy - ry * distanceAlongLine
+		if dx * dx + dy * dy <= sr and distanceAlongLine <= rmagnitude + sr and distanceAlongLine > -sr then
+			return false
 		end
 	end
-	end
+
 	return true
 end
 
-function OccupancyGrid:reserveLineSegment(sx, sy, ex, ey, thickness)
-	local function f(x, y, r, g, b, a)
-		local rx = ex - sx
-		local ry = ey - sy
-		local rmagnitude = math.sqrt(rx * rx + ry * ry)
-		rx = rx / rmagnitude
-		ry = ry / rmagnitude
-		local dx = x - sx
-		local dy = y - sy
-		local distanceAlongLine = dx * rx + dy * ry
-		if distanceAlongLine > thickness * 2 + rmagnitude then
-			return r, g, b, a
-		end
-		dx = dx - rx * distanceAlongLine
-		dy = dy - ry * distanceAlongLine
-		if dx * dx + dy * dy > thickness * thickness then
-			return r, g, b, a
-		end
-		return 1, g, b, a
-	end
-	self.image:mapPixel(f)
-
-	local function f(x, y, r, g, b, a)
-		x = self.filterRatio * x
-		y = self.filterRatio * y
-		local filterthickness = self.filterRatio * 2 + thickness
-		local rx = ex - sx
-		local ry = ey - sy
-		local rmagnitude = math.sqrt(rx * rx + ry * ry)
-		rx = rx / rmagnitude
-		ry = ry / rmagnitude
-		local dx = x - sx
-		local dy = y - sy
-		local distanceAlongLine = dx * rx + dy * ry
-		if distanceAlongLine > filterthickness * 2 + rmagnitude then
-			return r, g, b, a
-		end
-		dx = dx - rx * distanceAlongLine
-		dy = dy - ry * distanceAlongLine
-		if dx * dx + dy * dy > filterthickness * filterthickness then
-			return r, g, b, a
-		end
-		return 1, g, b, a
-	end
-	self.filterImage:mapPixel(f)
+function OccupancyCache:reserveLineSegment(sx, sy, ex, ey, thickness)
+	self.lines[#self.lines + 1] = {sx = sx, sy = sy, ex = ex, ey = ey, thickness = thickness}
 end
 
 --[[
@@ -147,7 +73,7 @@ function Map:__init__(game, entranceTunnelID)
 	local width = love.graphics.getWidth()
 	local height = love.graphics.getHeight()
 
-	local occupancyGrid = OccupancyGrid(width, height)
+	local occupancyCache = OccupancyCache(width, height)
 
 --[[<<<<<<< HEAD
 	for i=1,math.random(1, 10) do
@@ -161,7 +87,7 @@ function Map:__init__(game, entranceTunnelID)
 		repeat
 			local x = width * math.random()
 			local y = height * math.random()
-			if occupancyGrid:circleIsUnreserved(x, y, radius) then
+			if occupancyCache:circleIsUnreserved(x, y, radius) then
 				return x, y
 			end
 		until false
@@ -174,7 +100,7 @@ function Map:__init__(game, entranceTunnelID)
 	if entranceTunnelID then
 		local exitTunnelID = self.game:generateNewTunnelID(true, entranceTunnelID)
 		local x, y = generateRandomCircle(10)
-		occupancyGrid:reserveCircle(x, y, 10)
+		occupancyCache:reserveCircle(x, y, 10)
 		local entity = Tunnel(self.game, x, y, exitTunnelID)
 		self.game.entities.player:setPosition(x, y)
 		entity.shouldWaitUntilPlayerLeaves = true
@@ -192,7 +118,7 @@ function Map:__init__(game, entranceTunnelID)
 	--Generate a certain number of new tunnel entrances/exits
 	for i=1, math.random(2, 3) do
 		local x, y = generateRandomCircle(10)
-		occupancyGrid:reserveCircle(x, y, 10)
+		occupancyCache:reserveCircle(x, y, 10)
 		--With 1/8 probability, make the new exit connect to an existing exit
 		--Changing this will change the probability that the exit leads to a map they've already been to
 		local id = self.game:generateNewTunnelID(math.random(1, 8) == 1)
@@ -243,14 +169,14 @@ function Map:__init__(game, entranceTunnelID)
 			xs[#xs + 1], ys[#ys + 1] = x, y
 			for k = 1, n do
 				local x, y = generateRandomCircle(10)
-				occupancyGrid:reserveCircle(x, y, 10)
+				occupancyCache:reserveCircle(x, y, 10)
 				--local x = width * math.random()
 				--local y = height * math.random()
 				xs[#xs + 1], ys[#ys + 1] = x, y
 			end
 			xs[#xs + 1], ys[#ys + 1] = tunnels[j]:getPosition()
 			for k = 1, n + 1 do
-				occupancyGrid:reserveLineSegment(xs[k], ys[k], xs[k + 1], ys[k + 1], 10)
+				occupancyCache:reserveLineSegment(xs[k], ys[k], xs[k + 1], ys[k + 1], 10)
 				local x = xs[k]
 				local y = ys[k]
 				local impulseFactor = (math.random() + 1) * 1
@@ -264,7 +190,7 @@ function Map:__init__(game, entranceTunnelID)
 					local ox, oy = (math.random() * 2 - 1) * 10, (math.random() * 2 - 1) * 10
 					local cx = ox + x + (xs[k + 1] - xs[k]) * math.random()
 					local cy = oy + y + (ys[k + 1] - ys[k]) * math.random()
-					--occupancyGrid:reserveCircle(cx, cy, 10)
+					--occupancyCache:reserveCircle(cx, cy, 10)
 					local collect = Collectable(self.game, cx, cy)
 					self.game:addEntity(collect)
 					self:addEntity(collect)
@@ -275,7 +201,7 @@ function Map:__init__(game, entranceTunnelID)
 					local ox, oy = (math.random() * 2 - 1) * 10, (math.random() * 2 - 1) * 10
 					local cx = ox + x + (xs[k + 1] - xs[k]) * math.random()
 					local cy = oy + y + (ys[k + 1] - ys[k]) * math.random()
-					--occupancyGrid:reserveCircle(cx, cy, 10)
+					--occupancyCache:reserveCircle(cx, cy, 10)
 					local numKinds = 5
 					local kind = math.random(numKinds)
 					local powerup = Powerup(self.game, cx, cy, kind)
@@ -294,7 +220,7 @@ function Map:__init__(game, entranceTunnelID)
 	--Generate trees
 	for i=1,math.random(300, 400) do
 		local x, y = generateRandomCircle(10)
-		--occupancyGrid:reserveCircle(x, y, 20)
+		--occupancyCache:reserveCircle(x, y, 20)
 		local entity = SceneryEntity(self.game, x, y)
 		entity:setRestitution(math.random() * 2)
 		self.game:addEntity(entity)
