@@ -197,10 +197,8 @@ function Game:onRender()
 
 	--Timer bar
 	timeUp = self.timePassed/self.timeTotal
-    love.graphics.setColor(50, 200, 50, 255)
-    love.graphics.rectangle("fill", 750, 10, 20, 100)
-    love.graphics.setColor(200, 50, 50, 255)
-    love.graphics.rectangle("fill", 750, 10, 20, timeUp*100)
+    love.graphics.setColor(0, 0, 0, math.pow(timeUp, 1/2.2)*255)
+    love.graphics.rectangle("fill", 0, 0, 1000, 800)
 
     love.graphics.setColor(150, 150, 150, 255)
 	love.graphics.print("timeup: " .. timeUp, 10, 550)
