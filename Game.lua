@@ -196,9 +196,12 @@ function Game:onRender()
 	love.graphics.print("Collected: " .. self.collectableCount, 10, 580)
 
 	--Timer bar
+	love.graphics.setBlendMode("multiplicative")
 	timeUp = self.timePassed/self.timeTotal
-    love.graphics.setColor(0, 0, 0, math.pow(timeUp, 1/2.2)*255)
+	local alpha = (1 - math.pow(timeUp, 1/2.2))*255
+    	love.graphics.setColor(alpha, alpha, alpha, 255)
     love.graphics.rectangle("fill", 0, 0, 1000, 800)
+	love.graphics.setBlendMode("alpha")
 
     love.graphics.setColor(150, 150, 150, 255)
 	love.graphics.print("timeup: " .. timeUp, 10, 550)
