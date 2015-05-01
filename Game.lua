@@ -8,6 +8,7 @@ local Map = require "Map"
 local Tunnel = require "Tunnel"
 local Collectable = require "Collectable"
 local Powerup = require "Powerup"
+local ItemTracker = require "ItemTracker"
 
 --[[The Game class controls everything that happens in the game at a high
 	level.
@@ -53,6 +54,8 @@ function Game:__init__()
 	self.entities = {}
 	self.entities.player = Player(self)
 	self.entities.map = Map(self, self.startingTunnelID)
+
+	self.itemTracker = ItemTracker(self)
 
 	love.graphics.setBackgroundColor(255, 255, 255)
 
@@ -191,9 +194,15 @@ function Game:onRender()
 		if f then f(entity) end
 	end
 
-	--Collectable count
-	love.graphics.setColor(150, 150, 150, 255)
+	--Bottom bar
+	love.graphics.setColor(0, 0, 0, 255)
+	love.graphics.rectangle("fill", 0, 570, 1000, 100)
+	love.graphics.setColor(255, 255, 255, 255)
 	love.graphics.print("Collected: " .. self.collectableCount, 10, 580)
+	local barItems = self.itemTracker:getAllItems()
+	for i,v in ipairs(barItems) do
+		love.graphics.draw(v.image, 300+(i*v.radius*2), 570, 0, .5, .5)
+	end
 
 	--Timer bar
 	love.graphics.setBlendMode("multiplicative")
@@ -202,9 +211,6 @@ function Game:onRender()
     	love.graphics.setColor(alpha, alpha, alpha, 255)
     love.graphics.rectangle("fill", 0, 0, 1000, 800)
 	love.graphics.setBlendMode("alpha")
-
-    love.graphics.setColor(150, 150, 150, 255)
-	love.graphics.print("timeup: " .. timeUp, 10, 550)
 
 	love.graphics.pop()
 end

@@ -6,22 +6,27 @@ local Item = Class()
 --]]
 
 -- initialize Item object
-function Item:__init__(game, x, y)
+function Item:__init__(game, x, y, name)
 	self.game = game
-	self.radius = 5
+	self.radius = 16
 	local mass = 1
 	self.shape = love.physics.newCircleShape(self.radius)
 	self.body = love.physics.newBody(game.world, x, y, "static")
 	self.fixture = love.physics.newFixture(self.body, self.shape, mass)
 	self.fixture:setUserData(self)
+	self.image =
+		love.graphics.newImage("Assets/GoalCollectables/" .. name .. ".png")
 end
 
 -- draw Item
 function Item:onRender()
 	love.graphics.setColor(150, 150, 150, 255)
 	local x, y = self:getPosition()
-	local numberOfSegments = 50
-	love.graphics.circle("fill", x, y, self.radius, numberOfSegments)
+	love.graphics.setColor(255, 255, 255, 255)
+	love.graphics.draw(self.image,
+						x - self.radius,
+						y - self.radius,
+						0, 0.5, 0.5, 0, 0)
 end
 
 -- process collision with Item
