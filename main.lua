@@ -1,9 +1,16 @@
 local Game = require "Game"
+local Title = require "Title"
+local End = require "End"
 local CurrentGame
+local TitleStatus
+local GameStatus
+local FinalScore
+local Character
 
 function love.load()
-	CurrentGame = Game()
+	CurrentGame = Title()
 	love.audio.setVolume(0.1)
+	TitleStatus = true
 end
 
 function love.draw()
@@ -11,16 +18,27 @@ function love.draw()
 end
 
 function love.focus(element)
-	
+
 end
 
 function love.update(seconds)
+	if not CurrentGame.status then
+		if TitleStatus then
+			TitleStatus = false
+			GameStatus = true
+			Character = CurrentGame.character
+			CurrentGame = Game(Character)
+		elseif GameStatus then
+			FinalScore = CurrentGame.collectableCount
+			CurrentGame = End(FinalScore)
+			GameStatus = false
+		end
+	end
 	CurrentGame:onUpdate(seconds)
-	
 end
 
 function love.quit()
-	
+
 end
 
 function love.mousepressed(x, y, button)

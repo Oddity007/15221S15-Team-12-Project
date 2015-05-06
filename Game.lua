@@ -18,7 +18,9 @@ local Powerup = require "Powerup"
 --]]
 
 -- initialize the Game
-function Game:__init__()
+function Game:__init__(character)
+	self.status = true
+	self.character = character
 	self.assetManager = AssetManager()
 	self.soundManager = SoundManager()
 	self.world = love.physics.newWorld(0, 0, 0)
@@ -51,7 +53,7 @@ function Game:__init__()
 
 	--prepare (collidable) entities
 	self.entities = {}
-	self.entities.player = Player(self)
+	self.entities.player = Player(self, self.character)
 	self.entities.map = Map(self, self.startingTunnelID)
 
 	love.graphics.setBackgroundColor(255, 255, 255)
@@ -179,7 +181,7 @@ function Game:onRender()
 		love.graphics.setColor(150, 150, 150, 255)
 		love.graphics.rectangle("fill", 0, 0, 1000, 800)
 		love.graphics.setColor(0, 0, 0, 255)
-		love.graphics.print("Out of time")
+		self.status = false
 		love.graphics.pop()
 		return
 	end
@@ -197,10 +199,12 @@ function Game:onRender()
 
 	--Timer bar
 	timeUp = self.timePassed/self.timeTotal
-    love.graphics.setColor(50, 200, 50, 255)
-    love.graphics.rectangle("fill", 750, 10, 20, 100)
-    love.graphics.setColor(200, 50, 50, 255)
-    love.graphics.rectangle("fill", 750, 10, 20, timeUp)
+    love.graphics.setColor(0, 0, 0, math.pow(timeUp, 1/2.2)*255)
+    love.graphics.rectangle("fill", 0, 0, 1000, 800)
+
+    love.graphics.setColor(150, 150, 150, 255)
+	love.graphics.print("timeup: " .. timeUp, 10, 550)
+
 	love.graphics.pop()
 end
 
