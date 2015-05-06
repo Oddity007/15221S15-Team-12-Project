@@ -64,7 +64,6 @@ function Game:__init__(character)
 	self.collectableCount = 0
 
 	self.timeDilation = 1
-	self.timeOffset = 0
 	self.timeTotal = 180.0
 	self.timePassed = 0.0
 end
@@ -95,7 +94,7 @@ end
 
 --Add to or remove from Time Offset (Game time relative to player time)
 function Game:addTimeOffset(to)
-	self.timeOffset = self.timeOffset + to
+	--self.timePassed = self.timePassed + to
 end
 
 -- process what happens when player enters a tunnel
@@ -184,7 +183,6 @@ function Game:onRender()
 		love.graphics.setColor(150, 150, 150, 255)
 		love.graphics.rectangle("fill", 0, 0, 1000, 800)
 		love.graphics.setColor(0, 0, 0, 255)
-		self.status = false
 		love.graphics.pop()
 		return
 	end
@@ -221,6 +219,10 @@ end
 function Game:onUpdate(seconds)
 	seconds = seconds * self.timeDilation
 	self.timePassed = self.timePassed + seconds
+
+	if self.timePassed > self.timeTotal then
+		self.status = false
+	end
 
 	self.soundManager:update(seconds)
 

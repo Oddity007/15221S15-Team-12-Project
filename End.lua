@@ -17,6 +17,7 @@ function End:__init__(finalScore)
 end
 
 function End:onRender()
+	love.graphics.setColor(255, 255, 255, 255)
 	width, height = love.graphics.getDimensions()
 	bgScalew = width / 1440
 	bgScaleh = height / 900
@@ -24,8 +25,8 @@ function End:onRender()
 	love.graphics.draw(self.bg,0,0,0, bgScalew, bgScaleh)
 
 	love.graphics.setFont(love.graphics.newFont(18))
-	love.graphics.print("Your final score is: " .. self.finalScore, 10, 10)
-	love.graphics.print("You collected NUMBER items in NUMBER time.", 10, 28)
+	love.graphics.print("Congratulations, your final score is: " .. self.finalScore, 10, 10)
+	--love.graphics.print("You collected NUMBER items in NUMBER time.", 10, 28)
 
 end
 

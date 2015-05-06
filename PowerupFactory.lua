@@ -75,8 +75,8 @@ function PowerupFactory:onContact(contact, otherEntity)
 	else
 		local xVector, yVector = otherEntity.body:getLinearVelocity()
 		if self.kind == 3 then
-			xVector = -xVector * 4
-			yVector = -yVector * 4
+			xVector = -xVector * 3
+			yVector = -yVector * 3
 		elseif self.kind == 4 then
 			xVector = xVector / 2
 			yVector = yVector / 2
@@ -84,8 +84,8 @@ function PowerupFactory:onContact(contact, otherEntity)
 			xVector = -xVector / 2
 			yVector = -yVector / 2
 		elseif self.kind == 6 then
-			xVector = xVector / 4
-			yVector = yVector / 4
+			xVector = xVector / 3
+			yVector = yVector / 3
 		else
 			xVector = -xVector * 2
 			yVector = -yVector * 2
