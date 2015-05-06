@@ -116,7 +116,7 @@ function Map:__init__(game, entranceTunnelID)
 	end
 
 	--Generate a certain number of new tunnel entrances/exits
-	for i=1, math.random(2, 3) do
+	for i=1, math.random(1, 1) do
 		local x, y = generateRandomCircle(10)
 		occupancyCache:reserveCircle(x, y, 10)
 		--With 1/8 probability, make the new exit connect to an existing exit
@@ -154,7 +154,7 @@ function Map:__init__(game, entranceTunnelID)
 	for i = 1, #tunnels do
 	for j = 1, #tunnels do
 		if i ~= j then
-			local n = math.random(1, 2)
+			local n = math.random(1, 5)
 			local xs = {}
 			local ys = {}
 			local x, y = tunnels[i]:getPosition()
@@ -176,7 +176,7 @@ function Map:__init__(game, entranceTunnelID)
 			end
 			xs[#xs + 1], ys[#ys + 1] = tunnels[j]:getPosition()
 			for k = 1, n + 1 do
-				occupancyCache:reserveLineSegment(xs[k], ys[k], xs[k + 1], ys[k + 1], 10)
+				occupancyCache:reserveLineSegment(xs[k], ys[k], xs[k + 1], ys[k + 1], 40)
 				local x = xs[k]
 				local y = ys[k]
 				local impulseFactor = (math.random() + 1) * 1
